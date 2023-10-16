@@ -1,6 +1,8 @@
 const usersURL = 'http://127.0.0.1:3000/';
 const listUsers = 'users'
 const userID = '651fe2e6176dd80bc3988c42';
+const productsURL = 'http://127.0.0.1:3000/';
+const listProducts = 'products';
 const userWrapper = document.getElementById('user-wrapper');
 
 
@@ -41,12 +43,26 @@ async function fetchData() {
   try {
     const response = await fetch(usersURL + listUsers);
     const usersArray = await response.json();
+    console.log(usersArray)
     return usersArray;
   } catch (error) {
     console.error("Error fetching data:", error);
     return [];
   }
 }
+
+async function fetchCartData() {
+  try {
+    const response = await fetch(usersURL+listUsers+ "/" +userID  + "/cart");
+    const cartArray = await response.json();
+    console.log(cartArray)
+    return cartArray;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+}
+
 
 function deleteUser(userId) {
   // Send a DELETE request to your server to delete the product
@@ -89,9 +105,13 @@ async function emptyShoppingCart() {
 });
 }
 
+
+
 async function displayData() {
   const dataToDisplay = await fetchData();
-
+  const cartDatatoDisplay = await fetchCartData();
+  const productCartArray = cartDatatoDisplay.user[0].user_cart_data
+  console.log(cartDatatoDisplay.user[0].user_cart_data);
   //kodel abjekta meta jei neirasau users.
   console.log(dataToDisplay.users)
   userWrapper.innerHTML = '';
@@ -106,9 +126,16 @@ async function displayData() {
     const userCartProducts = document.createElement('div');
     userCartProducts.setAttribute("class", "user-cart");
     userCartProducts.textContent = "userCartProducts: "+ user.userCartProducts;
-    const userCartProcuctData = document.createElement('div');
-    userCartProcuctData.innerHTML = `<div class="cart-product-data">
-    </div>`
+    const cartContainer = document.createElement('div');
+    // const shoppingCart = document.createElement('button');
+    // shoppingCart.textContent = "Shopping cart";
+    productCartArray.forEach((obj)=>{
+      const userCartProcuctData = document.createElement('div');
+      userCartProcuctData.innerHTML = `<div class="cart-product-data">Title:${obj.title}, Price: ${obj.price}, Quantity: ${obj.quantity};
+    </div>`;
+    cartContainer.append(userCartProcuctData);
+    })
+    
     const emptyCart = document.createElement('button');
     emptyCart.textContent = "Empty the shopping cart";
     emptyCart.addEventListener('click', () => {
@@ -127,7 +154,7 @@ async function displayData() {
     }, 1000);
       
   });
-    card.append(username,email,userCartProducts,deleteBtn, emptyCart);
+    card.append(username,email,userCartProducts ,cartContainer, deleteBtn, emptyCart);
     // card.innerHTML = `${id} ${title} ${description} ${quantity} ${price}`;
 
     userWrapper.append(card);
